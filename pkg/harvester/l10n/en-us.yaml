@@ -799,8 +799,8 @@ harvester:
       tag: Tag
     csiDriverConfig:
       provisioner: Provisioner
-      volumeSnapshotClassName: volumeSnapshotClassName
-      backupVolumeSnapshotClassName: backupVolumeSnapshotClassName
+      volumeSnapshotClassName: Volume Snapshot Class Name
+      backupVolumeSnapshotClassName: Backup Volume Snapshot Class Name
     containerdRegistry:
       mirrors:
         mirrors: Mirrors
