@@ -628,6 +628,23 @@ export default {
       }
     },
 
+    removeUnusedFields(data) {
+      for (const key in data) {
+        if (Object.prototype.hasOwnProperty.call(data, key)) {
+          const value = data[key];
+          if (key.startsWith('_') || value === null || value === '' || (Array.isArray(value) && value.length === 0) || (typeof value === 'object' && Object.keys(value).length === 0)) {
+            delete data[key];
+          } else if (typeof value === 'object') {
+            this.removeUnusedFields(value);
+            if (Object.keys(value).length === 0) {
+              delete data[key];
+            }
+          }
+        }
+      }
+      return data;
+    },
+
     updateScheduling(neu) {
       const { affinity } = clone(neu);
 
@@ -638,29 +655,7 @@ export default {
         return;
       }
 
-      const affinitySchedulings = affinity.podAffinity.requiredDuringSchedulingIgnoredDuringExecution;
-
-      if (affinitySchedulings.length > 0) {
-        affinitySchedulings.forEach((S) => {
-          delete S._namespaceOption;
-          delete S._namespaces;
-          delete S._id;
-          delete S._anti;
-        });
-      }
-
-      const antiAffinitySchedulings = affinity.podAntiAffinity.requiredDuringSchedulingIgnoredDuringExecution;
-
-      if (antiAffinitySchedulings.length > 0) {
-        antiAffinitySchedulings.forEach((S) => {
-          delete S._namespaceOption;
-          delete S._namespaces;
-          delete S._id;
-          delete S._anti;
-        });
-      }
-
-      this.value.vmAffinity = base64Encode(JSON.stringify(affinity));
+      this.value.vmAffinity = base64Encode(JSON.stringify(this.removeUnusedFields(affinity)));
       this.vmAffinity = neu;
     },
 
