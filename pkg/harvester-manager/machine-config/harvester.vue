@@ -16,8 +16,8 @@ import UnitInput from '@shell/components/form/UnitInput';
 import YamlEditor from '@shell/components/YamlEditor';
 import { Checkbox } from '@components/Form/Checkbox';
 import { Banner } from '@components/Banner';
+import { clone, get } from '@shell/utils/object';
 
-import { get } from '@shell/utils/object';
 import { _CREATE } from '@shell/config/query-params';
 import { removeObject } from '@shell/utils/array';
 import { mapGetters } from 'vuex';
@@ -629,13 +629,35 @@ export default {
     },
 
     updateScheduling(neu) {
-      const { affinity } = neu;
+      const { affinity } = clone(neu);
 
       if (!affinity.nodeAffinity && !affinity.podAffinity && !affinity.podAntiAffinity) {
         this.value.vmAffinity = '';
         this.vmAffinity = { affinity: {} };
 
         return;
+      }
+
+      const affinitySchedulings = affinity.podAffinity.requiredDuringSchedulingIgnoredDuringExecution;
+
+      if (affinitySchedulings.length > 0) {
+        affinitySchedulings.forEach((S) => {
+          delete S._namespaceOption;
+          delete S._namespaces;
+          delete S._id;
+          delete S._anti;
+        });
+      }
+
+      const antiAffinitySchedulings = affinity.podAntiAffinity.requiredDuringSchedulingIgnoredDuringExecution;
+
+      if (antiAffinitySchedulings.length > 0) {
+        antiAffinitySchedulings.forEach((S) => {
+          delete S._namespaceOption;
+          delete S._namespaces;
+          delete S._id;
+          delete S._anti;
+        });
       }
 
       this.value.vmAffinity = base64Encode(JSON.stringify(affinity));
