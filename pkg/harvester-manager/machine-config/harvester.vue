@@ -520,15 +520,15 @@ export default {
     test() {
       const errors = [];
 
-      if (!this.userDataIsBase64) {
+      if (!this.userDataIsBase64 && isBase64(this.value.userData)) {
         this.value.userData = base64Decode(this.value.userData);
       }
 
-      if (!this.networkDataIsBase64) {
+      if (!this.networkDataIsBase64 && isBase64(this.value.networkData)) {
         this.value.networkData = base64Decode(this.value.networkData);
       }
 
-      if (!this.vmAffinityIsBase64) {
+      if (!this.vmAffinityIsBase64 && isBase64(this.value.vmAffinity)) {
         this.value.vmAffinity = base64Decode(this.value.vmAffinity);
       }
 
@@ -687,10 +687,13 @@ export default {
 
       const newAffinity = this.removeAffinityUnusedFields(affinity);
 
+      // Do not update if it is not an actual change, such as the removal of whitespace or a change in map key order
       if (!isEqual(this.vmAffinityObj, newAffinity)) {
         this.value.vmAffinity = base64Encode(JSON.stringify(newAffinity));
-      } else {
+      } else if (this.vmAffinityIsBase64) {
         this.value.vmAffinity = this.vmAffinityHistoric;
+      } else {
+        this.value.vmAffinity = base64Encode(this.vmAffinityHistoric);
       }
       this.vmAffinity = neu;
     },
@@ -741,6 +744,7 @@ export default {
         })
       };
 
+      // Do not update if it is not an actual change, such as the removal of whitespace or a change in map key order
       if (!isEqual(this.disksObj, diskInfo)) {
         this.value.diskInfo = JSON.stringify(diskInfo);
       } else {
@@ -749,6 +753,7 @@ export default {
 
       const networkInfo = { interfaces: this.interfaces };
 
+      // Do not update if it is not an actual change, such as the removal of whitespace or a change in map key order
       if (!isEqual(this.networksObj, networkInfo)) {
         this.value.networkInfo = JSON.stringify(networkInfo);
       } else {
